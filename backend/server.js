@@ -1,20 +1,39 @@
-const express = requiere('express');
-const dotenv = requiere('dotenv');
-const cors = requiere('cors');
+const express = require('express');
+const dotenv = require('dotenv');
+const cors = require('cors');
+const mongoose = require('mongoose');
+const productRoutes = require('./routes/productRoutes');
+
 // Configuración de variables de entorno
 dotenv.config();
-const app = express();
-// Middlewares (Software de apoyo)
-app.use(cors()) // Permite que tu frontend se comunique con el backend
-app.use(express.json());// Permite que el servidor entienda formato JSON
 
-// Ruta de prueba
-app.get('/',(req, res) => {
-    res.send('El servidor del Café está funcionando correctamente');
+const app = express();
+
+// Middlewares
+app.use(cors());
+app.use(express.json());
+app.use('/api/products', productRoutes);
+
+// --- CONEXIÓN A MONGODB ---
+// Usamos la variable que definiste en el archivo .env
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log('✅ Conectado exitosamente a MongoDB Atlas');
+    console.log('📦 Base de datos activa: ', mongoose.connection.name);
+  })
+  .catch((error) => {
+    console.error('❌ Error de conexión detallado:');
+    console.error(error.message);
+  });
+
+// Ruta de prueba inicial
+app.get('/', (req, res) => {
+  res.send('Servidor del Café funcionando y conectado a la BD');
 });
 
-//Arrancar servidor
+// Arrancar servidor
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`Servicor corriendo en el puerto ${PORT}`);
+  console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
